@@ -19,49 +19,72 @@ require 'ruby2d'
 require_relative 'gol_cell'
 require_relative 'gol_board'
 
-# the graph paper background image has squares that are 36 pixels and the image is 1079 x 719
+# the graph paper background image has squares that are 36 pixels for 20 rows x 30 columns,
+# and the image is 1079 x 719 pixels
+GRAPH_PAPER_IMAGE = 'graph_paper.png'
 SQUARE_SIZE = 36
 SQUARE_Z_DIM = 20
+NUM_ROWS = 20
+NUM_COLS = 30
 BACKGROUND_Z_DIM = 10
 GRAPH_PAPER_WIDTH = 1079
 GRAPH_PAPER_HEIGHT = 719
+
+# speed
+ITERATION_PAUSE = 0.2 # seconds
+STEADY_STATE_PAUSE = 2 # seconds
+
 
 # colors for a multicolored board
 COLORS = [['blue', 'green'], ['purple', 'red']]
 
 # initialize board
 def initialize_game_of_life
-  set title: 'Random Start - Game of Life Simulation', width: GRAPH_PAPER_WIDTH, height: GRAPH_PAPER_HEIGHT
+  set title: 'Random Start - Conway''s Game of Life', width: GRAPH_PAPER_WIDTH, height: GRAPH_PAPER_HEIGHT
 
   # Use a background image of graph paper for board
   Image.new(
-    'graph_paper.png',
+    GRAPH_PAPER_IMAGE,
     z: BACKGROUND_Z_DIM
   )
+
+  # create a board that is equal in size to background graph paper
+  board = GolBoard.new(NUM_ROWS, NUM_COLS)
+
+  # regenerate random board on any key press
+  on :key do |event|
+    board.random_start
+  end
+
+  # regenerate random board on right mouse click
+  on :mouse_down do |event|
+    if event.button == :right
+      board.random_start
+    end
+  end
+
+  board
 end
 
 
-initialize_game_of_life
+board = initialize_game_of_life
 
-# create a board that is equal in size to background graph paper
-board = GolBoard.new(20, 30)
 
 create_new_board = true
+
 
 # create a random board to start
 # iterate until there are no changes
 # then start over with another random board
 update do
   if create_new_board
-    puts "generating random board"
     board.random_start
     create_new_board = false
   else
-    sleep 0.2
+    sleep ITERATION_PAUSE
     num_changes = board.next_generation
     if num_changes.zero?
-      puts "no changes, generating new random board"
-      sleep 2
+      sleep STEADY_STATE_PAUSE
       create_new_board = true
     end
   end

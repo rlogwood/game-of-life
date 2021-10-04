@@ -30,6 +30,7 @@ class GolBoard
 
   # create a random board
   def random_start
+    puts "generating random board..."
     (0...@num_rows).each do |y|
       (0...@num_cols).each do |x|
         alive1 = SecureRandom.random_number(2) == 1
