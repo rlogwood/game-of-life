@@ -20,37 +20,46 @@ require_relative 'gol_cell'
 require_relative 'gol_board'
 require_relative 'gol_util'
 
+# ***********************************
+# ** User changeable constants start
+
+# ** board size dictated by factor  1=20x30, 2=40x60, 3=60x90, 4=80x120, 6=120x180, 9=180x270 (48,600 cells)
+# ** NOTE: scale factors greater than 4 are pretty slow on my machine, but speed up as colonies die off
+# ** NOTE: larger scale factors increase entertainment value :)
+SQUARE_SCALE_FACTOR = 4 # should be a factor of 36
+
+# ** speed
+ITERATION_PAUSE = 0.0 # seconds
+SLOWER_ITERATION_PAUSE = 0.3 # seconds
+STEADY_STATE_PAUSE = 2 # seconds
+
+# ** colors for a multicolored board
+COLORS = [['blue', 'green'], ['purple', 'red']]
+# ***********************************
+
+
+# GOL Constants
+
 # the graph paper background image has squares that are 36 pixels for 20 rows x 30 columns,
 # and the image is 1079 x 719 pixels
 GRAPH_PAPER_IMAGE = 'graph_paper.png'
-SQUARE_SIZE = 36
+GRAPH_SQUARE_SIZE = 36
 SQUARE_Z_DIM = 20
-NUM_ROWS = 20
-NUM_COLS = 30
+GRAPH_NUM_ROWS = 20
+GRAPH_NUM_COLS = 30
 BACKGROUND_Z_DIM = 10
 GRAPH_PAPER_WIDTH = 1079
 GRAPH_PAPER_HEIGHT = 719
 
-SQUARE_SIZE = 18
-NUM_ROWS = 80
-NUM_COLS = 120
+# board size calcs
+SQUARE_SIZE = GRAPH_SQUARE_SIZE / SQUARE_SCALE_FACTOR
+NUM_ROWS = GRAPH_NUM_ROWS * SQUARE_SCALE_FACTOR
+NUM_COLS = GRAPH_NUM_COLS * SQUARE_SCALE_FACTOR
 
-#SQUARE_SIZE = 9
-#NUM_ROWS = 160
-#NUM_COLS = 240
-
-
-# speed
-#ITERATION_PAUSE = 0.2 # seconds
-ITERATION_PAUSE = 0.0 # seconds
-SLOWER_ITERATION_PAUSE = 0.3 # seconds
-STEADY_STATE_PAUSE = 2 # seconds
+# cycle detection
+CYCLE_DEPTH_LENGTH_CHECKS = [3, 4].freeze
 STEADY_STATE_ITERATIONS = 20
 SLOW_AFTER_STEADY_STATE_ITERATIONS = 10
-
-
-# colors for a multicolored board
-COLORS = [['blue', 'green'], ['purple', 'red']]
 
 # initialize board
 def initialize_game_of_life
@@ -85,37 +94,33 @@ board = initialize_game_of_life
 
 create_new_board = true
 
-change_count = []
+change_counts = []
 # create a random board to start
 # iterate until there are no changes
 # then start over with another random board
 update do
   if create_new_board
     board.random_start
-    change_count = []
+    change_counts = []
     board.go_slower = false
     create_new_board = false
   else
     if board.go_slower
-      puts "we are slowed..."
+      print "."
       sleep SLOWER_ITERATION_PAUSE
     else
       sleep ITERATION_PAUSE
     end
     num_changes = board.next_generation
-    #puts "num_changes: #{num_changes}"
     if num_changes.zero?
       sleep STEADY_STATE_PAUSE
       create_new_board = true
     else
-      change_count.push num_changes
+      change_counts.push num_changes
     end
   end
 
-  #[slow_down, same] = reaching_steady_state(change_count)
-  slow_down, same = reaching_steady_state(change_count)
-  #  puts "slow_down:#{slow_down} same:#{same}"
-  board.go_slower = slow_down
+  board.go_slower, same = steady_state_check(change_counts)
 
   if same
     create_new_board = true
