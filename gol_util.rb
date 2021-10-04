@@ -4,13 +4,15 @@ def reaching_steady_state(change_count)
   num_found = 0
 
   #p change_count
+
   if change_count.length > STEADY_STATE_ITERATIONS
     count = change_count[change_count.length - 1]
-    last_iterations_counts = change_count.slice(-STEADY_STATE_ITERATIONS,change_count.length)
-    #p last_iterations_counts
+    last_iterations_counts = change_count.slice(-STEADY_STATE_ITERATIONS, change_count.length)
+
     same = true
 
     last_iterations_counts.reverse!
+    p last_iterations_counts
 
     # last_iterations_counts.each do |value|
     #   same &&= (value == count)
