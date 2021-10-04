@@ -57,11 +57,11 @@ update do
     board.random_start
     create_new_board = false
   else
-    sleep 1
+    sleep 0.2
     num_changes = board.next_generation
     if num_changes.zero?
       puts "no changes, generating new random board"
-      sleep 5
+      sleep 2
       create_new_board = true
     end
   end
