@@ -18,6 +18,7 @@ require 'securerandom'
 require 'ruby2d'
 require_relative 'gol_cell'
 require_relative 'gol_board'
+require_relative 'gol_util'
 
 # the graph paper background image has squares that are 36 pixels for 20 rows x 30 columns,
 # and the image is 1079 x 719 pixels
@@ -31,8 +32,12 @@ GRAPH_PAPER_WIDTH = 1079
 GRAPH_PAPER_HEIGHT = 719
 
 # speed
-ITERATION_PAUSE = 0.2 # seconds
+#ITERATION_PAUSE = 0.2 # seconds
+ITERATION_PAUSE = 0.1 # seconds
+SLOWER_ITERATION_PAUSE = 0.3 # seconds
 STEADY_STATE_PAUSE = 2 # seconds
+STEADY_STATE_ITERATIONS = 20
+SLOW_AFTER_STEADY_STATE_ITERATIONS = 10
 
 
 # colors for a multicolored board
@@ -66,27 +71,46 @@ def initialize_game_of_life
   board
 end
 
-
 board = initialize_game_of_life
 
 
 create_new_board = true
 
-
+change_count = []
 # create a random board to start
 # iterate until there are no changes
 # then start over with another random board
 update do
   if create_new_board
     board.random_start
+    change_count = []
+    board.go_slower = false
     create_new_board = false
   else
-    sleep ITERATION_PAUSE
+    if board.go_slower
+      puts "we are slowed..."
+      sleep SLOWER_ITERATION_PAUSE
+    else
+      sleep ITERATION_PAUSE
+    end
     num_changes = board.next_generation
+    #puts "num_changes: #{num_changes}"
     if num_changes.zero?
       sleep STEADY_STATE_PAUSE
       create_new_board = true
+    else
+      change_count.push num_changes
     end
+  end
+
+  #[slow_down, same] = reaching_steady_state(change_count)
+  slow_down, same = reaching_steady_state(change_count)
+  #  puts "slow_down:#{slow_down} same:#{same}"
+  board.go_slower = slow_down
+
+  if same
+    create_new_board = true
+    sleep STEADY_STATE_PAUSE
   end
 end
 

@@ -1,11 +1,13 @@
 # create a board for Game of Life
 class GolBoard
   attr_reader :num_rows, :num_cols
+  attr_accessor :go_slower
 
   # create a board of dimension num_rows by num_cols
   def initialize(num_rows, num_cols)
     @num_rows = num_rows
     @num_cols = num_cols
+    @go_slower = false
     @cells = Array.new(@num_rows) { |row| Array.new(@num_cols) { |col| GolCell.new(row, col) } }
   end
 

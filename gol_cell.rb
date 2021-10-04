@@ -42,7 +42,7 @@ class GolCell
       if @visual
         @visual.add
       else
-        @visual = square_at(@row, @col, color = COLORS[col % 2][row % 2])
+        @visual = square_at(@row, @col)
       end
     else
       @visual&.remove
@@ -55,14 +55,11 @@ class GolCell
   def square_at(y, x, color = COLORS[x % 2][y % 2])
     x_pos = x * SQUARE_SIZE
     y_pos = y * SQUARE_SIZE
-    #puts "x:#{x}, y:#{y}, color:#{color}"
-    sq = Square.new(
+    Square.new(
       x: x_pos, y: y_pos,
       size: SQUARE_SIZE,
       color: color,
       z: SQUARE_Z_DIM
     )
   end
-
-    
 end
