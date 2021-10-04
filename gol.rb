@@ -40,7 +40,7 @@ COLORS = [['blue', 'green'], ['purple', 'red']]
 
 # initialize board
 def initialize_game_of_life
-  set title: 'Random Start - Conway''s Game of Life', width: GRAPH_PAPER_WIDTH, height: GRAPH_PAPER_HEIGHT
+  set title: "Conway's Game of Life - (random restart w/right mouse click) ", width: GRAPH_PAPER_WIDTH, height: GRAPH_PAPER_HEIGHT
 
   # Use a background image of graph paper for board
   Image.new(
